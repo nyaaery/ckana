@@ -12,7 +12,7 @@
 
 #define DIM(arr) (sizeof(arr) / sizeof(arr[0]))
 
-#define DIACRITIC_FREQ 0.4
+#define DIACRITIC_FREQ 0.3
 #define DIAGRAPH_FREQ 0.1
 #define SOKUON_FREQ 0.05
 
@@ -39,7 +39,7 @@ const char* hiragana_diacritics[][2] = {
 };
 
 const char* hiragana_diagraphs[][2] = {
-    { u8"きゃ", "kya" }, { u8"きょ", "kyu" }, { u8"きゅ", "kyo" },
+    { u8"きゃ", "kya" }, { u8"きゅ", "kyu" }, { u8"きょ", "kyo" },
     { u8"しゃ", "sha" }, { u8"しゅ", "shu" }, { u8"しょ", "sho" },
     { u8"ちゃ", "cha" }, { u8"ちゅ", "chu" }, { u8"ちょ", "cho" },
     { u8"にゃ", "nya" }, { u8"にゅ", "nyu" }, { u8"にょ", "nyo" },
@@ -305,32 +305,6 @@ RandStr rand_hiragana_str(MaxCharLens* lens, int len) {
     return randstr;
 }
 
-// RandKanaStrVal rand_hiragana(MaxCharLensVal* lens, int str_len) {
-//     //                                              + 1 for null terminator.
-//     char* kanastr = calloc(lens->kana_len * str_len + 1, sizeof(char));
-//     char* romanjistr = calloc(lens->romanji_len * str_len + 1, sizeof(char));
-//
-//     for (int i = 0; i < str_len; i++) {
-//         int j = rand() % kana_len;
-//
-//         const char* kanachar = kana[j][0];
-//         const char* romanjichar = kana[j][1];
-//         
-//         if (i == 0) {
-//             strcpy(kanastr, kanachar);
-//             strcpy(romanjistr, romanjichar);
-//         } else {
-//             strcat(kanastr, kanachar);
-//             strcat(romanjistr, romanjichar);
-//         }
-//     }
-//
-//     return (RandKanaStrVal) {
-//         .kanastr = kanastr,
-//         .romanjistr = romanjistr
-//     };
-// }
-
 void randstr_free(RandStr* self) {
     free(self->kanastr);
     free(self->romanjistr);
@@ -345,122 +319,134 @@ void trim_end_in_place(char* str) {
     }
 }
 
-// void kana_problem(MaxCharLensVal* hiragana_lens) {
-//     int char_count = 5;
-//
-//     RandKanaStrVal randstr = rand_kana_str(hiragana, DIM(hiragana), hiragana_lens, char_count);
-//
-//     int h = 9;
-//     int w = 48;
-//     int y = (LINES - h) / 2;
-//     int x = (COLS - w) / 2;
-//
-//     WINDOW* problem_win = newwin(h, w, y, x);
-//     box(problem_win, 0, 0);
-//
-//     mvwprintw(problem_win, 2, 4, "write in romanji");
-//     mvwprintw(problem_win, 4, 4, randstr.kanastr);
-//     wmove(problem_win, 6, 4);
-//     wrefresh(problem_win);
-//
-//     int in_len = hiragana_lens->romanji_len * char_count;
-//     FIELD* field = new_field(1, in_len, 0, 0, 0, 0);
-//     set_field_back(field, A_UNDERLINE);
-//     field_opts_off(field, O_AUTOSKIP);
-//
-//     FIELD* fields[2] = {
-//         field,
-//         NULL
-//     };
-//
-//     FORM* form = new_form(fields);
-//
-//     int subh;
-//     int subw;
-//     scale_form(form, &subh, &subw);
-//
-//     WINDOW* sub_win = newwin(subh, subw, y + 6, x + 4);
-//     set_form_win(form, problem_win);
-//     set_form_sub(form, sub_win);
-//     post_form(form);
-//
-//     wrefresh(sub_win);
-//     
-//     bool done = false;
-//     while (!done) {
-//         int ch = getch();
-//
-//         switch (ch) {
-//             case '\n':
-//             case '\r':
-//             case EOF:
-//                 form_driver(form, REQ_NEXT_FIELD);
-//                 done = true;
-//                 break;
-//             case KEY_BACKSPACE:
-//                 form_driver(form, REQ_DEL_PREV);
-//                 break;
-//             default:
-//                 form_driver(form, ch);
-//                 break;
-//         }
-//
-//         wrefresh(sub_win);
-//     }
-//
-//     unpost_form(form);
-//
-//     //             + 1 for null terminator.
-//     char in[in_len + 1];
-//     memset(&in, NULL, in_len + 1);
-//
-//     char* buf = field_buffer(field, 0);
-//     strcpy(in, buf);
-//     trim_end_in_place(in);
-//
-//     free_field(field);
-//     free_form(form);
-//     delwin(sub_win);
-//
-//     delwin(problem_win);
-//
-//     int res = strcmp(randstr.romanjistr, in);
-//
-//     if (res == 0) {
-//         h = 9;
-//     } else {
-//         h = 10;
-//     }
-//     w = w;
-//     y = (LINES - h) / 2;
-//     x = (COLS - w) / 2;
-//
-//     WINDOW* result_win = newwin(h, w, y, x);
-//     box(result_win, 0, 0);
-//
-//     if (res == 0) {
-//         mvwprintw(result_win, 2, 4, "CORRECT!");
-//         mvwprintw(result_win, 4, 4, randstr.kanastr);
-//         mvwprintw(result_win, 6, 4, in);
-//     } else {
-//         mvwprintw(result_win, 2, 4, "incorrect");
-//         mvwprintw(result_win, 4, 4, randstr.kanastr);
-//         
-//         mvwprintw(result_win, 6, 4, in);
-//         mvwprintw(result_win, 6, w - 9 - 4, "you wrote");
-//         mvwprintw(result_win, 7, 4, randstr.romanjistr);
-//         mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
-//         
-//         int len = strlen(in);
-//         wmove(result_win, 6, 4 + len);
-//     }
-//
-//     wrefresh(result_win);
-//
-//     getch();
-//
-//     delwin(result_win);
-// }
+void kana_problem(MaxCharLens* lens) {
+    int char_count = 5;
+
+    RandStr randstr = rand_hiragana_str(lens, char_count);
+
+    int h = 9;
+    int w = 48;
+    int y = (LINES - h) / 2;
+    int x = (COLS - w) / 2;
+
+    WINDOW* problem_win = newwin(h, w, y, x);
+    box(problem_win, 0, 0);
+
+    mvwprintw(problem_win, 2, 4, "write in romanji");
+    mvwprintw(problem_win, 4, 4, randstr.kanastr);
+    wmove(problem_win, 6, 4);
+    wrefresh(problem_win);
+
+    int in_len = lens->romanji_len * char_count;
+    FIELD* field = new_field(1, in_len, 0, 0, 0, 0);
+    set_field_back(field, A_UNDERLINE);
+    field_opts_off(field, O_AUTOSKIP);
+
+    FIELD* fields[2] = {
+        field,
+        NULL
+    };
+
+    FORM* form = new_form(fields);
+
+    int subh;
+    int subw;
+    scale_form(form, &subh, &subw);
+
+    WINDOW* sub_win = newwin(subh, subw, y + 6, x + 4);
+    set_form_win(form, problem_win);
+    set_form_sub(form, sub_win);
+    post_form(form);
+
+    wrefresh(sub_win);
+   
+    bool done = false;
+    while (!done) {
+        int ch = getch();
+
+        switch (ch) {
+            case '\n':
+            case '\r':
+            case EOF:
+                form_driver(form, REQ_NEXT_FIELD);
+                done = true;
+                break;
+            case KEY_BACKSPACE:
+                form_driver(form, REQ_DEL_PREV);
+                break;
+            default:
+                form_driver(form, ch);
+                break;
+        }
+
+        wrefresh(sub_win);
+    }
+
+    unpost_form(form);
+
+    //             + 1 for null terminator.
+    char in[in_len + 1];
+    memset(&in, 0, in_len + 1);
+
+    char* buf = field_buffer(field, 0);
+    strcpy(in, buf);
+    trim_end_in_place(in);
+
+    free_field(field);
+    free_form(form);
+    wclear(sub_win);
+    wrefresh(sub_win);
+    delwin(sub_win);
+
+    wclear(problem_win);
+    wrefresh(problem_win);
+    delwin(problem_win);
+
+    int res = strcmp(randstr.romanjistr, in);
+
+    if (res == 0) {
+        h = 9;
+    } else {
+        h = 10;
+    }
+    w = w;
+    y = (LINES - h) / 2;
+    x = (COLS - w) / 2;
+
+    WINDOW* result_win = newwin(h, w, y, x);
+    box(result_win, 0, 0);
+
+    if (res == 0) {
+        init_pair(1, COLOR_GREEN, COLOR_BLACK);
+        wattron(result_win, COLOR_PAIR(1) | A_BOLD);
+        mvwprintw(result_win, 2, 4, "CORRECT!");
+        wstandend(result_win);
+        mvwprintw(result_win, 4, 4, randstr.kanastr);
+        mvwprintw(result_win, 6, 4, in);
+    } else {
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+        wattron(result_win, COLOR_PAIR(1) | A_BOLD);
+        mvwprintw(result_win, 2, 4, "incorrect");
+        wstandend(result_win);
+        mvwprintw(result_win, 4, 4, randstr.kanastr);
+       
+        mvwprintw(result_win, 6, 4, in);
+        mvwprintw(result_win, 6, w - 9 - 4, "you wrote");
+        mvwprintw(result_win, 7, 4, randstr.romanjistr);
+        mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
+       
+        int len = strlen(in);
+        wmove(result_win, 6, 4 + len);
+    }
+
+    wrefresh(result_win);
+
+    getch();
+
+    wclear(result_win);
+    wrefresh(result_win);
+    delwin(result_win);
+}
 
 int main() {
     setlocale(LC_ALL, "");
@@ -469,21 +455,21 @@ int main() {
     MaxCharLens lens = hiragana_max_char_lens();
 
     initscr();
+    
+    // Assert that terminal supports color.
+    assert(has_colors() == TRUE);
+
+    start_color();
     keypad(stdscr, TRUE);
     noecho();
 
     refresh();
 
-    // kana_problem(&hiragana_lens);
+    while (true) {
+        kana_problem(&lens);
+    }
 
     endwin();
-
-    while (true) {
-        RandStr randstr = rand_hiragana_str(&lens, 5);
-        printf("%s\n", randstr.romanjistr);
-        printf("%s\n", randstr.kanastr);
-        randstr_free(&randstr);
-    }
 
     return 0;
 }
