@@ -60,11 +60,11 @@ const char* hiragana_sokuon = u8"っ";
 
 const char** hiragana_sokuon_constraints_monographs[] = {
     // K
-    hiragana_monographs[5], hiragana_monographs[6], hiragana_monographs[7], hiragana_monographs[8], hiragana_monographs[9],
+    hiragana_monographs[5],  hiragana_monographs[6],  hiragana_monographs[7],  hiragana_monographs[8],  hiragana_monographs[9],
     // S
-    hiragana_monographs[10], hiragana_monographs[11], hiragana_monographs[12], hiragana_monographs[13], hiragana_monographs[14],
+    hiragana_monographs[10],                          hiragana_monographs[12], hiragana_monographs[13], hiragana_monographs[14],
     // T
-    hiragana_monographs[15], hiragana_monographs[16], hiragana_monographs[17], hiragana_monographs[18], hiragana_monographs[19]
+    hiragana_monographs[15],                          hiragana_monographs[17], hiragana_monographs[18], hiragana_monographs[19]
 };
 
 const char** hiragana_sokuon_constraints_diacritics[] = {
