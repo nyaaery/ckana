@@ -8,6 +8,7 @@
 #include <assert.h>
 
 #include <curses.h>
+#include <menu.h>
 #include <form.h>
 
 #define DIM(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -106,9 +107,9 @@ typedef struct {
     int romanji_len;
 } MaxCharLens;
 
-void linear_search_max_char_lens(MaxCharLens* lens, const Pair const* pairs, int len) {
+void linear_search_max_char_lens(MaxCharLens* lens, const Pair const* pairs, size_t pairs_len) {
     // Linear search for maximums.
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < pairs_len; i++) {
         const char const* kanachar = pairs[i][0];
         int kana_len = strlen(kanachar);
         if (kana_len > lens->kana_len) {
@@ -147,7 +148,7 @@ typedef struct {
     char* romanjistr;
 } RandStr;
 
-void randstr_append_rand_char(RandStr* randstr, const Pair const* pairs, int pairs_len) {
+void randstr_append_rand_char(RandStr* randstr, const Pair const* pairs, size_t pairs_len) {
     int i = rand() % pairs_len;
 
     const char* kanachar = pairs[i][0];
@@ -169,11 +170,14 @@ void randstr_append_rand_char(RandStr* randstr, const Pair const* pairs, int pai
 }
 
 void randstr_append_rand_diagraph(RandStr* randstr,
-                                  const Pair const* pairs, int pairs_len,
-                                  const Pair const* diacritic_pairs, int diacritic_pairs_len) {
+                                  const Pair const* pairs, size_t pairs_len,
+                                  const Pair const* diacritic_pairs, size_t diacritic_pairs_len) {
     float x = randf();
 
-    if (x <= DIACRITIC_FREQ) {
+    // Scale frequency to compensate for no sokuon and diagraphs.
+    float diacritic_x = DIACRITIC_FREQ + DIACRITIC_FREQ * DIAGRAPH_FREQ + DIACRITIC_FREQ * SOKUON_FREQ;
+
+    if (x <= diacritic_x) {
         // Diagraph with diacritic.
         randstr_append_rand_char(randstr, diacritic_pairs, diacritic_pairs_len);
     } else {
@@ -211,12 +215,15 @@ void hiragana_append_sokuon(RandStr* randstr) {
     float x = randf();
     float y = randf();
 
+    // Scale frequency to compensate for no sokuon and diagraphs.
+    float diacritic_y = DIACRITIC_FREQ + DIACRITIC_FREQ * DIAGRAPH_FREQ + DIACRITIC_FREQ * SOKUON_FREQ;
+
     const char* kanachar;
     const char* romanjichar;
     bool regular;
 
     if (x <= DIAGRAPH_FREQ) {
-        if (y <= DIACRITIC_FREQ) {
+        if (y <= diacritic_y) {
             // Diagraph with diacritic.
             int i = rand() % DIM(hiragana_sokuon_diagraphs_diacritics);
             kanachar = hiragana_sokuon_diagraphs_diacritics[i][0];
@@ -232,7 +239,7 @@ void hiragana_append_sokuon(RandStr* randstr) {
             romanjichar = randpair.pair[1];
         }
     } else {
-        if (y <= DIACRITIC_FREQ) {
+        if (y <= diacritic_y) {
             // Diacritic
             int i = rand() % DIM(hiragana_sokuon_diacritics);
             kanachar = hiragana_sokuon_diacritics[i][0];
@@ -344,6 +351,44 @@ RandStr rand_hiragana_str(MaxCharLens* lens, int len) {
     return randstr;
 }
 
+PairPtr rand_hiragana_pair() {
+    PairPtr pair;
+
+    float x = randf();
+
+    // Scale frequencies to compensate for no sokuon.
+    float diagraph_x = DIAGRAPH_FREQ + DIAGRAPH_FREQ * SOKUON_FREQ;
+    float diacritic_x = diagraph_x + DIACRITIC_FREQ + DIACRITIC_FREQ * SOKUON_FREQ;
+
+    if (x <= diagraph_x) {
+        // Diagraph
+        float y = randf();
+
+        // Scale frequency to compensate for no sokuon and diagraphs.
+        float diacritic_y = DIACRITIC_FREQ + DIACRITIC_FREQ * DIAGRAPH_FREQ + DIACRITIC_FREQ * SOKUON_FREQ;
+
+        if (y <= diacritic_y) {
+            // Diagraph with diacritic.
+            int i = rand() % DIM(hiragana_diagraphs_diacritics);
+            pair = hiragana_diagraphs_diacritics[i];
+        } else {
+            // Diagraph
+            int i = rand() % DIM(hiragana_diagraphs);
+            pair = hiragana_diagraphs[i];
+        }
+    } else if (x <= diacritic_x) {
+        // Diacritic
+        int i = rand() % DIM(hiragana_diacritics);
+        pair = hiragana_diacritics[i];
+    } else {
+        // Monograph
+        int i = rand() % DIM(hiragana_monographs);
+        pair = hiragana_monographs[i];
+    }
+
+    return pair;
+}
+
 void randstr_free(RandStr* self) {
     free(self->kanastr);
     free(self->romanjistr);
@@ -358,6 +403,17 @@ void trim_end_in_place(char* str) {
     }
 }
 
+// Does not call wrefresh.
+WINDOW* new_win_center(int h, int w) {
+    int y = (LINES - h) / 2;
+    int x = (COLS - w) / 2;
+
+    WINDOW* win = newwin(h, w, y, x);
+    box(win, 0, 0);
+
+    return win;
+}
+
 void hiragana_kana_problem(MaxCharLens* lens) {
     int char_count = 5;
 
@@ -365,11 +421,7 @@ void hiragana_kana_problem(MaxCharLens* lens) {
 
     int h = 9;
     int w = 48;
-    int y = (LINES - h) / 2;
-    int x = (COLS - w) / 2;
-
-    WINDOW* problem_win = newwin(h, w, y, x);
-    box(problem_win, 0, 0);
+    WINDOW* problem_win = new_win_center(h, w);
 
     mvwprintw(problem_win, 2, 4, "write in romanji");
     mvwprintw(problem_win, 4, 4, randstr.kanastr);
@@ -392,7 +444,7 @@ void hiragana_kana_problem(MaxCharLens* lens) {
     int subw;
     scale_form(form, &subh, &subw);
 
-    WINDOW* sub_win = newwin(subh, subw, y + 6, x + 4);
+    WINDOW* sub_win = derwin(problem_win, subh, subw, 6, 4);
     set_form_win(form, problem_win);
     set_form_sub(form, sub_win);
     post_form(form);
@@ -431,12 +483,10 @@ void hiragana_kana_problem(MaxCharLens* lens) {
     strcpy(in, buf);
     trim_end_in_place(in);
 
-    free_field(field);
     free_form(form);
-    wclear(sub_win);
-    wrefresh(sub_win);
-    delwin(sub_win);
+    free_field(field);
 
+    delwin(sub_win);
     wclear(problem_win);
     wrefresh(problem_win);
     delwin(problem_win);
@@ -449,11 +499,8 @@ void hiragana_kana_problem(MaxCharLens* lens) {
         h = 10;
     }
     w = w;
-    y = (LINES - h) / 2;
-    x = (COLS - w) / 2;
 
-    WINDOW* result_win = newwin(h, w, y, x);
-    box(result_win, 0, 0);
+    WINDOW* result_win = new_win_center(h, w);
 
     if (res == 0) {
         init_pair(1, COLOR_GREEN, COLOR_BLACK);
@@ -479,7 +526,6 @@ void hiragana_kana_problem(MaxCharLens* lens) {
     }
 
     wrefresh(result_win);
-
     getch();
 
     wclear(result_win);
@@ -487,6 +533,138 @@ void hiragana_kana_problem(MaxCharLens* lens) {
     delwin(result_win);
 
     randstr_free(&randstr);
+}
+
+void hiragana_romanji_problem() {
+    int option_count = 15;
+
+    PairPtr problempair = rand_hiragana_pair();
+
+    int h = 11;
+    int w = 48;
+    WINDOW* problem_win = new_win_center(h, w);
+
+    mvwprintw(problem_win, 2, 4, "select in hiragana");
+    mvwprintw(problem_win, 4, 4, problempair[1]);
+    wrefresh(problem_win);
+
+    int correct_i = rand() % option_count;
+
+    //                       + 1 for null terminator.
+    ITEM* items[option_count + 1];
+    items[option_count] = NULL;
+
+    for (int i = 0; i < option_count; i++) {
+        if (i == correct_i) {
+            items[i] = new_item(problempair[0], 0);
+        } else {
+            PairPtr randpair = rand_hiragana_pair();
+            items[i] = new_item(randpair[0], 0);
+        }
+    }
+
+    MENU* menu = new_menu(items);
+    set_menu_format(menu, 3, 5);
+    set_menu_mark(menu, " ");
+    menu_opts_off(menu, O_SHOWDESC);
+
+    int subh;
+    int subw;
+    scale_menu(menu, &subh, &subw);
+
+    WINDOW* sub_win = derwin(problem_win, subh, subw, 6, 4);
+    set_menu_win(menu, problem_win);
+    set_menu_sub(menu, sub_win);
+    post_menu(menu);
+
+    wrefresh(problem_win);
+    keypad(problem_win, TRUE);
+
+    bool done = false;
+    while (!done) {
+        int ch = wgetch(problem_win);
+
+        switch (ch) {
+            case '\n':
+            case '\r':
+            case EOF:
+                done = true;
+                break;
+            case 'j':
+            case KEY_DOWN:
+                menu_driver(menu, REQ_DOWN_ITEM);
+                break;
+            case 'k':
+            case KEY_UP:
+                menu_driver(menu, REQ_UP_ITEM);
+                break;
+            case 'l':
+            case KEY_RIGHT:
+                menu_driver(menu, REQ_RIGHT_ITEM);
+                break;
+            case 'h':
+            case KEY_LEFT:
+                menu_driver(menu, REQ_LEFT_ITEM);
+                break;
+        }
+
+        wrefresh(problem_win);
+    }
+
+    unpost_menu(menu);
+
+    const char* selected_kanachar = item_name(current_item(menu));
+
+    free_menu(menu);
+    for (int i = 0; i < option_count; i++) {
+        free_item(items[i]);
+    }
+
+    delwin(sub_win);
+    wclear(problem_win);
+    wrefresh(problem_win);
+    delwin(problem_win);
+
+    int res = strcmp(problempair[0], selected_kanachar);
+
+    if (res == 0) {
+        h = 9;
+    } else {
+        h = 10;
+    }
+    w = w;
+
+    WINDOW* result_win = new_win_center(h, w);
+
+    if (res == 0) {
+        init_pair(1, COLOR_GREEN, COLOR_BLACK);
+        wattron(result_win, COLOR_PAIR(1) | A_BOLD);
+        mvwprintw(result_win, 2, 4, "CORRECT!");
+        wstandend(result_win);
+        mvwprintw(result_win, 4, 4, problempair[1]);
+        mvwprintw(result_win, 6, 4, selected_kanachar);
+    } else {
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+        wattron(result_win, COLOR_PAIR(1) | A_BOLD);
+        mvwprintw(result_win, 2, 4, "incorrect");
+        wstandend(result_win);
+        mvwprintw(result_win, 4, 4, problempair[1]);
+
+        mvwprintw(result_win, 6, 4, selected_kanachar);
+        mvwprintw(result_win, 6, w - 12 - 4, "you selected");
+        mvwprintw(result_win, 7, 4, problempair[0]);
+        mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
+
+        int len = strlen(selected_kanachar);
+        wmove(result_win, 6, 4 + len);
+    }
+
+    wrefresh(result_win);
+    getch();
+
+    wclear(result_win);
+    wrefresh(result_win);
+    delwin(result_win);
 }
 
 int main() {
@@ -508,6 +686,7 @@ int main() {
 
     while (true) {
         hiragana_kana_problem(&hiragana_lens);
+        hiragana_romanji_problem();
     }
 
     endwin();
