@@ -16,7 +16,10 @@
 #define DIAGRAPH_FREQ 0.1
 #define SOKUON_FREQ 0.05
 
-const char* hiragana_monographs[][2] = {
+typedef const char const* Pair[2];
+typedef const char const* const* PairPtr;
+
+const Pair hiragana_monographs[] = {
     { u8"あ", "a" },  { u8"い", "i" },   { u8"う", "u" },   { u8"え", "e" },  { u8"お", "o" },
     { u8"か", "ka" }, { u8"き", "ki" },  { u8"く", "ku" },  { u8"け", "ke" }, { u8"こ", "ko" },
     { u8"さ", "sa" }, { u8"し", "shi" }, { u8"す", "su" },  { u8"せ", "se" }, { u8"そ", "so" },
@@ -30,7 +33,7 @@ const char* hiragana_monographs[][2] = {
     { u8"ん", "n" }
 };
 
-const char* hiragana_diacritics[][2] = {
+const Pair hiragana_diacritics[] = {
     { u8"かﾞ", "ga" }, { u8"きﾞ", "gi" }, { u8"くﾞ", "gu" }, { u8"けﾞ", "ge" }, { u8"こﾞ", "go" },
     { u8"さﾞ", "za" }, { u8"しﾞ", "ji" }, { u8"すﾞ", "zu" }, { u8"せﾞ", "ze" }, { u8"そﾞ", "zo" },
     { u8"たﾞ", "da" }, { u8"ちﾞ", "ji" }, { u8"つﾞ", "zu" }, { u8"てﾞ", "de" }, { u8"とﾞ", "do" },
@@ -38,7 +41,7 @@ const char* hiragana_diacritics[][2] = {
     { u8"はﾟ", "pa" }, { u8"ひﾟ", "pi" }, { u8"ふﾟ", "pu" }, { u8"へﾟ", "pe" }, { u8"ほﾟ", "po" }
 };
 
-const char* hiragana_diagraphs[][2] = {
+const Pair hiragana_diagraphs[] = {
     { u8"きゃ", "kya" }, { u8"きゅ", "kyu" }, { u8"きょ", "kyo" },
     { u8"しゃ", "sha" }, { u8"しゅ", "shu" }, { u8"しょ", "sho" },
     { u8"ちゃ", "cha" }, { u8"ちゅ", "chu" }, { u8"ちょ", "cho" },
@@ -48,7 +51,7 @@ const char* hiragana_diagraphs[][2] = {
     { u8"りゃ", "rya" }, { u8"りゅ", "ryu" }, { u8"りょ", "ryo" }
 };
 
-const char* hiragana_diagraphs_diacritics[][2] = {
+const Pair hiragana_diagraphs_diacritics[] = {
     { u8"きﾞゃ", "gya" }, { u8"きﾞゅ", "gyu" }, { u8"きﾞょ", "gyo" },
     { u8"しﾞゃ", "ja" },  { u8"しﾞゅ", "ju" },  { u8"しﾞょ", "jo" },
     { u8"ちﾞゃ", "ja" },  { u8"ちﾞゅ", "ju" },  { u8"ちﾞょ", "jo" },
@@ -56,48 +59,43 @@ const char* hiragana_diagraphs_diacritics[][2] = {
     { u8"ひﾟゃ", "pya" }, { u8"ひﾟゅ", "pyu" }, { u8"ひﾟょ", "pyo" }
 };
 
-const char* hiragana_sokuon = u8"っ";
+const char const* hiragana_sokuon = u8"っ";
 
-const char** hiragana_sokuon_constraints_monographs[] = {
+const PairPtr hiragana_sokuon_monographs[] = {
     // K
     hiragana_monographs[5],  hiragana_monographs[6],  hiragana_monographs[7],  hiragana_monographs[8],  hiragana_monographs[9],
     // S
-    hiragana_monographs[10],                          hiragana_monographs[12], hiragana_monographs[13], hiragana_monographs[14],
+    hiragana_monographs[10], hiragana_monographs[11], hiragana_monographs[12], hiragana_monographs[13], hiragana_monographs[14],
     // T
     hiragana_monographs[15],                          hiragana_monographs[17], hiragana_monographs[18], hiragana_monographs[19]
 };
 
-const char** hiragana_sokuon_constraints_diacritics[] = {
+const Pair hiragana_sokuon_monographs_irregular[] = {
+    // T
+    { u8"っち", "tchi" }
+};
+
+const PairPtr hiragana_sokuon_diacritics[] = {
     // P
     hiragana_diacritics[20], hiragana_diacritics[21], hiragana_diacritics[22], hiragana_diacritics[23], hiragana_diacritics[24]
 };
 
-const char** hiragana_sokuon_constraints_diagraphs[] = {
+const PairPtr hiragana_sokuon_diagraphs[] = {
     // K
     hiragana_diagraphs[0], hiragana_diagraphs[1], hiragana_diagraphs[2], 
     // S
     hiragana_diagraphs[3], hiragana_diagraphs[4], hiragana_diagraphs[5]
 };
 
-const char** hiragana_sokuon_constraints_diagraphs_diacritics[] = {
+const Pair hiragana_sokuon_diagraphs_irregular[] = {
+    // T
+    { u8"っちゃ", "tcha" }, { u8"っちゅ", "tchu" }, { u8"っちょ", "tcho" }
+};
+
+const PairPtr hiragana_sokuon_diagraphs_diacritics[] = {
     // P
     hiragana_diagraphs_diacritics[12],  hiragana_diagraphs_diacritics[13], hiragana_diagraphs_diacritics[14]
 };
-
-typedef enum {
-    ResultErr,
-    ResultOk
-} ResultVariant;
-
-typedef struct {
-    ResultVariant var;
-    void* val;
-} Result;
-
-bool result_is_ok(Result* res) {
-    bool is_ok = res->var == ResultOk;
-    return is_ok;
-}
 
 float randf() {
     return ((float) rand()) / ((float) RAND_MAX);
@@ -108,16 +106,16 @@ typedef struct {
     int romanji_len;
 } MaxCharLens;
 
-void linear_search_max_char_lens(const char* chars[][2], int len, MaxCharLens* lens) {
+void linear_search_max_char_lens(MaxCharLens* lens, const Pair const* pairs, int len) {
     // Linear search for maximums.
     for (int i = 0; i < len; i++) {
-        const char* kanachar = chars[i][0];
+        const char const* kanachar = pairs[i][0];
         int kana_len = strlen(kanachar);
         if (kana_len > lens->kana_len) {
             lens->kana_len = kana_len;
         }
 
-        const char* romanjichar = chars[i][1];
+        const char const* romanjichar = pairs[i][1];
         int romanji_len = strlen(romanjichar);
         if (romanji_len > lens->romanji_len) {
             lens->romanji_len = romanji_len;
@@ -131,10 +129,10 @@ MaxCharLens hiragana_max_char_lens() {
         .romanji_len = 0
     };
     
-    linear_search_max_char_lens(hiragana_monographs, DIM(hiragana_monographs), &lens);
-    linear_search_max_char_lens(hiragana_diacritics, DIM(hiragana_diacritics), &lens);
-    linear_search_max_char_lens(hiragana_diagraphs, DIM(hiragana_diagraphs), &lens);
-    linear_search_max_char_lens(hiragana_diagraphs_diacritics, DIM(hiragana_diagraphs_diacritics), &lens);
+    linear_search_max_char_lens(&lens, hiragana_monographs, DIM(hiragana_monographs));
+    linear_search_max_char_lens(&lens, hiragana_diacritics, DIM(hiragana_diacritics));
+    linear_search_max_char_lens(&lens, hiragana_diagraphs, DIM(hiragana_diagraphs));
+    linear_search_max_char_lens(&lens, hiragana_diagraphs_diacritics, DIM(hiragana_diagraphs_diacritics));
 
     int sokuon_len = strlen(hiragana_sokuon);
     if (sokuon_len > lens.kana_len) {
@@ -149,21 +147,21 @@ typedef struct {
     char* romanjistr;
 } RandStr;
 
-void randstr_append_rand_char(RandStr* randstr, const char* chars[][2], int chars_len) {
-    int i = rand() % chars_len;
+void randstr_append_rand_char(RandStr* randstr, const Pair const* pairs, int pairs_len) {
+    int i = rand() % pairs_len;
 
-    const char* kanachar = chars[i][0];
-    const char* romanjichar = chars[i][1];
+    const char* kanachar = pairs[i][0];
+    const char* romanjichar = pairs[i][1];
 
     if (randstr->kanastr[0] == 0) {
-        // kanastr is empty. 
+        // kanastr is empty.
         strcpy(randstr->kanastr, kanachar);
     } else {
         strcat(randstr->kanastr, kanachar);
     }
 
     if (randstr->romanjistr[0] == 0) {
-        // romanjistr is empty. 
+        // romanjistr is empty.
         strcpy(randstr->romanjistr, romanjichar);
     } else {
         strcat(randstr->romanjistr, romanjichar);
@@ -171,17 +169,42 @@ void randstr_append_rand_char(RandStr* randstr, const char* chars[][2], int char
 }
 
 void randstr_append_rand_diagraph(RandStr* randstr,
-                                  const char* chars[][2], int chars_len,
-                                  const char* diacritic_chars[][2], int diacritic_chars_len) {
+                                  const Pair const* pairs, int pairs_len,
+                                  const Pair const* diacritic_pairs, int diacritic_pairs_len) {
     float x = randf();
 
     if (x <= DIACRITIC_FREQ) {
         // Diagraph with diacritic.
-        randstr_append_rand_char(randstr, diacritic_chars, diacritic_chars_len);
+        randstr_append_rand_char(randstr, diacritic_pairs, diacritic_pairs_len);
     } else {
         // Diagraph
-        randstr_append_rand_char(randstr, chars, chars_len);
+        randstr_append_rand_char(randstr, pairs, pairs_len);
     }
+}
+
+typedef struct {
+    bool regular;
+    PairPtr pair;
+} RandSokuonPair;
+
+RandSokuonPair rand_sokuon_pair(PairPtr const* regular_pairs, size_t regular_pairs_len,
+                                Pair const* irregular_pairs, size_t irregular_pairs_len) {
+    PairPtr pair;
+    bool regular;
+    size_t i = rand() % (regular_pairs_len + irregular_pairs_len);
+
+    if (i < regular_pairs_len) {
+        pair = regular_pairs[i];
+        regular = true;
+    } else {
+        pair = irregular_pairs[i - regular_pairs_len];
+        regular = false;
+    }
+
+    return (RandSokuonPair) {
+        .regular = regular,
+        .pair = pair
+    };
 }
 
 void hiragana_append_sokuon(RandStr* randstr) {
@@ -190,26 +213,39 @@ void hiragana_append_sokuon(RandStr* randstr) {
 
     const char* kanachar;
     const char* romanjichar;
+    bool regular;
 
     if (x <= DIAGRAPH_FREQ) {
         if (y <= DIACRITIC_FREQ) {
-            int i = rand() % DIM(hiragana_sokuon_constraints_diagraphs_diacritics);
-            kanachar = hiragana_sokuon_constraints_diagraphs_diacritics[i][0];
-            romanjichar = hiragana_sokuon_constraints_diagraphs_diacritics[i][1];
+            // Diagraph with diacritic.
+            int i = rand() % DIM(hiragana_sokuon_diagraphs_diacritics);
+            kanachar = hiragana_sokuon_diagraphs_diacritics[i][0];
+            romanjichar = hiragana_sokuon_diagraphs_diacritics[i][1];
         } else {
-            int i = rand() % DIM(hiragana_sokuon_constraints_diagraphs);
-            kanachar = hiragana_sokuon_constraints_diagraphs[i][0];
-            romanjichar = hiragana_sokuon_constraints_diagraphs[i][1];
+            // Diagraph
+            RandSokuonPair randpair = rand_sokuon_pair(hiragana_sokuon_diagraphs,
+                                                       DIM(hiragana_sokuon_diagraphs),
+                                                       hiragana_sokuon_diagraphs_irregular,
+                                                       DIM(hiragana_sokuon_diagraphs_irregular));
+            regular = randpair.regular;
+            kanachar = randpair.pair[0];
+            romanjichar = randpair.pair[1];
         }
     } else {
         if (y <= DIACRITIC_FREQ) {
-            int i = rand() % DIM(hiragana_sokuon_constraints_diacritics);
-            kanachar = hiragana_sokuon_constraints_diacritics[i][0];
-            romanjichar = hiragana_sokuon_constraints_diacritics[i][1];
+            // Diacritic
+            int i = rand() % DIM(hiragana_sokuon_diacritics);
+            kanachar = hiragana_sokuon_diacritics[i][0];
+            romanjichar = hiragana_sokuon_diacritics[i][1];
         } else {
-            int i = rand() % DIM(hiragana_sokuon_constraints_monographs);
-            kanachar = hiragana_sokuon_constraints_monographs[i][0];
-            romanjichar = hiragana_sokuon_constraints_monographs[i][1];
+            // Monograph
+            RandSokuonPair randpair = rand_sokuon_pair(hiragana_sokuon_monographs,
+                                                       DIM(hiragana_sokuon_monographs),
+                                                       hiragana_sokuon_monographs_irregular,
+                                                       DIM(hiragana_sokuon_monographs_irregular));
+            regular = randpair.regular;
+            kanachar = randpair.pair[0];
+            romanjichar = randpair.pair[1];
         }
     }
 
@@ -217,11 +253,14 @@ void hiragana_append_sokuon(RandStr* randstr) {
     // Sakuon should not be the first mora.
     assert(randstr->kanastr[0] != 0);
     assert(randstr->romanjistr[0] != 0);
+   
+    if (regular) {
+        // Apply regular gemination romanisation rules.
+        strcat(randstr->kanastr, hiragana_sokuon);
+        strncat(randstr->romanjistr, romanjichar, 1); // Append first romanji consonant to repeat it.
+    }
 
-    strcat(randstr->kanastr, hiragana_sokuon);
     strcat(randstr->kanastr, kanachar);
-    
-    strncat(randstr->romanjistr, romanjichar, 1); // Append first romanji consonant to repeat it.
     strcat(randstr->romanjistr, romanjichar);
 }
 
@@ -266,7 +305,7 @@ RandStr rand_hiragana_str(MaxCharLens* lens, int len) {
             // Last mora.
             //     Should not append diagraph since they are two mora.
             //     Should not append sokuon.
-           
+          
             // Scale frequency to compensate for no sokuon and diagraphs.
             float diacritic_x = DIACRITIC_FREQ + DIACRITIC_FREQ * DIAGRAPH_FREQ + DIACRITIC_FREQ * SOKUON_FREQ;
 
@@ -319,7 +358,7 @@ void trim_end_in_place(char* str) {
     }
 }
 
-void kana_problem(MaxCharLens* lens) {
+void hiragana_kana_problem(MaxCharLens* lens) {
     int char_count = 5;
 
     RandStr randstr = rand_hiragana_str(lens, char_count);
@@ -359,7 +398,7 @@ void kana_problem(MaxCharLens* lens) {
     post_form(form);
 
     wrefresh(sub_win);
-   
+  
     bool done = false;
     while (!done) {
         int ch = getch();
@@ -429,12 +468,12 @@ void kana_problem(MaxCharLens* lens) {
         mvwprintw(result_win, 2, 4, "incorrect");
         wstandend(result_win);
         mvwprintw(result_win, 4, 4, randstr.kanastr);
-       
+      
         mvwprintw(result_win, 6, 4, in);
         mvwprintw(result_win, 6, w - 9 - 4, "you wrote");
         mvwprintw(result_win, 7, 4, randstr.romanjistr);
         mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
-       
+      
         int len = strlen(in);
         wmove(result_win, 6, 4 + len);
     }
@@ -446,16 +485,18 @@ void kana_problem(MaxCharLens* lens) {
     wclear(result_win);
     wrefresh(result_win);
     delwin(result_win);
+
+    randstr_free(&randstr);
 }
 
 int main() {
     setlocale(LC_ALL, "");
     srand(time(0));
 
-    MaxCharLens lens = hiragana_max_char_lens();
+    MaxCharLens hiragana_lens = hiragana_max_char_lens();
 
     initscr();
-    
+
     // Assert that terminal supports color.
     assert(has_colors() == TRUE);
 
@@ -466,7 +507,7 @@ int main() {
     refresh();
 
     while (true) {
-        kana_problem(&lens);
+        hiragana_kana_problem(&hiragana_lens);
     }
 
     endwin();
