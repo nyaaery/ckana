@@ -553,13 +553,16 @@ void hiragana_romanji_problem() {
     //                       + 1 for null terminator.
     ITEM* items[option_count + 1];
     items[option_count] = NULL;
+    PairPtr item_pairs[option_count];
 
     for (int i = 0; i < option_count; i++) {
         if (i == correct_i) {
             items[i] = new_item(problempair[0], 0);
+            item_pairs[i] = problempair;
         } else {
             PairPtr randpair = rand_hiragana_pair();
             items[i] = new_item(randpair[0], 0);
+            item_pairs[i] = randpair;
         }
     }
 
@@ -613,7 +616,8 @@ void hiragana_romanji_problem() {
 
     unpost_menu(menu);
 
-    const char* selected_kanachar = item_name(current_item(menu));
+    int selected_i = item_index(current_item(menu));
+    PairPtr selected_pair = item_pairs[selected_i];
 
     free_menu(menu);
     for (int i = 0; i < option_count; i++) {
@@ -625,7 +629,7 @@ void hiragana_romanji_problem() {
     wrefresh(problem_win);
     delwin(problem_win);
 
-    int res = strcmp(problempair[0], selected_kanachar);
+    int res = strcmp(problempair[1], selected_pair[1]);
 
     if (res == 0) {
         h = 9;
@@ -642,7 +646,7 @@ void hiragana_romanji_problem() {
         mvwprintw(result_win, 2, 4, "CORRECT!");
         wstandend(result_win);
         mvwprintw(result_win, 4, 4, problempair[1]);
-        mvwprintw(result_win, 6, 4, selected_kanachar);
+        mvwprintw(result_win, 6, 4, selected_pair[0]);
     } else {
         init_pair(1, COLOR_RED, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
@@ -650,12 +654,12 @@ void hiragana_romanji_problem() {
         wstandend(result_win);
         mvwprintw(result_win, 4, 4, problempair[1]);
 
-        mvwprintw(result_win, 6, 4, selected_kanachar);
+        mvwprintw(result_win, 6, 4, selected_pair[0]);
         mvwprintw(result_win, 6, w - 12 - 4, "you selected");
         mvwprintw(result_win, 7, 4, problempair[0]);
         mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
 
-        int len = strlen(selected_kanachar);
+        int len = strlen(selected_pair[0]);
         wmove(result_win, 6, 4 + len);
     }
 
