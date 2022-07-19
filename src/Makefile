@@ -7,7 +7,7 @@ BIN = ckana
 SRC := $(wildcard *.c **/*.c)
 OBJ := $(SRC:.c=.o)
 
-.PHONY: all install clean
+.PHONY: all install
 
 all: prebuild target
 
@@ -22,7 +22,3 @@ target: $(OBJ)
 
 install:
 	install -D -t $(PREFIX)/bin $(BIN)
-
-clean:
-	rm $(BIN)
-	rm -r $(OBJDIR)

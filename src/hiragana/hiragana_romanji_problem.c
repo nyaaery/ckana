@@ -59,7 +59,7 @@ void hiragana_romanji_problem(bool* quit) {
     int subw;
     scale_menu(menu, &subh, &subw);
 
-    WINDOW* sub_win = derwin(problem_win, subh, subw, 6, 4);
+    WINDOW* sub_win = derwin(problem_win, subh, subw, 6, PADDING_X);
     set_menu_win(menu, problem_win);
     set_menu_sub(menu, sub_win);
     post_menu(menu);
@@ -71,8 +71,8 @@ void hiragana_romanji_problem(bool* quit) {
         .sub_win = sub_win
     };
 
-    mvwprintw(problem_win, 2, 4, "select in hiragana");
-    mvwprintw(problem_win, 4, 4, "%s", problempair[1]);
+    mvwprintw(problem_win, 2, PADDING_X, "select in hiragana");
+    mvwprintw(problem_win, 4, PADDING_X, "%s", problempair[1]);
     wrefresh(problem_win);
 
     keypad(problem_win, TRUE);
@@ -134,24 +134,24 @@ void hiragana_romanji_problem(bool* quit) {
     if (res == 0) {
         init_pair(1, COLOR_GREEN, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
-        mvwprintw(result_win, 2, 4, "CORRECT!");
+        mvwprintw(result_win, 2, PADDING_X, "CORRECT!");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, "%s", problempair[1]);
-        mvwprintw(result_win, 6, 4, "%s", selected_pair[0]);
+        mvwprintw(result_win, 4, PADDING_X, "%s", problempair[1]);
+        mvwprintw(result_win, 6, PADDING_X, "%s", selected_pair[0]);
     } else {
         init_pair(1, COLOR_RED, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
-        mvwprintw(result_win, 2, 4, "incorrect");
+        mvwprintw(result_win, 2, PADDING_X, "incorrect");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, "%s", problempair[1]);
+        mvwprintw(result_win, 4, PADDING_X, "%s", problempair[1]);
 
-        mvwprintw(result_win, 6, 4, "%s", selected_pair[0]);
-        mvwprintw(result_win, 6, w - 12 - 4, "you selected");
-        mvwprintw(result_win, 7, 4, "%s", problempair[0]);
-        mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
+        mvwprintw(result_win, 6, PADDING_X, "%s", selected_pair[0]);
+        mvwprintw(result_win, 6, w - 12 - PADDING_X, "you selected");
+        mvwprintw(result_win, 7, PADDING_X, "%s", problempair[0]);
+        mvwprintw(result_win, 7, w - 14 - PADDING_X, "correct answer");
 
         int len = strlen(selected_pair[0]);
-        wmove(result_win, 6, 4 + len);
+        wmove(result_win, 6, PADDING_X + len);
     }
     wrefresh(result_win);
 

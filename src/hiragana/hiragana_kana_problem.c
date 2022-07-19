@@ -4,6 +4,7 @@
 #include <curses.h>
 #include <form.h>
 
+#include "../lib/ckana_def.h"
 #include "../lib/ckana_lib.h"
 #include "../lib/MaxLens.h"
 #include "../lib/RandStr.h"
@@ -46,7 +47,7 @@ void hiragana_kana_problem(bool* quit, MaxLens* lens) {
     int subw;
     scale_form(form, &subh, &subw);
 
-    WINDOW* sub_win = derwin(problem_win, subh, subw, 6, 4);
+    WINDOW* sub_win = derwin(problem_win, subh, subw, 6, PADDING_X);
     set_form_win(form, problem_win);
     set_form_sub(form, sub_win);
     post_form(form);
@@ -58,9 +59,9 @@ void hiragana_kana_problem(bool* quit, MaxLens* lens) {
         .sub_win = sub_win
     };
 
-    mvwprintw(problem_win, 2, 4, "write in romanji");
-    mvwprintw(problem_win, 4, 4, "%s", randstr.kanastr);
-    wmove(problem_win, 6, 4);
+    mvwprintw(problem_win, 2, PADDING_X, "write in romanji");
+    mvwprintw(problem_win, 4, PADDING_X, "%s", randstr.kanastr);
+    wmove(problem_win, 6, PADDING_X);
     wrefresh(problem_win);
     wrefresh(sub_win);
   
@@ -118,24 +119,24 @@ void hiragana_kana_problem(bool* quit, MaxLens* lens) {
     if (res == 0) {
         init_pair(1, COLOR_GREEN, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
-        mvwprintw(result_win, 2, 4, "CORRECT!");
+        mvwprintw(result_win, 2, PADDING_X, "CORRECT!");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, "%s", randstr.kanastr);
-        mvwprintw(result_win, 6, 4, "%s", in);
+        mvwprintw(result_win, 4, PADDING_X, "%s", randstr.kanastr);
+        mvwprintw(result_win, 6, PADDING_X, "%s", in);
     } else {
         init_pair(1, COLOR_RED, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
-        mvwprintw(result_win, 2, 4, "incorrect");
+        mvwprintw(result_win, 2, PADDING_X, "incorrect");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, "%s", randstr.kanastr);
+        mvwprintw(result_win, 4, PADDING_X, "%s", randstr.kanastr);
       
-        mvwprintw(result_win, 6, 4, "%s", in);
-        mvwprintw(result_win, 6, w - 9 - 4, "you wrote");
-        mvwprintw(result_win, 7, 4, "%s", randstr.romanjistr);
-        mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
+        mvwprintw(result_win, 6, PADDING_X, "%s", in);
+        mvwprintw(result_win, 6, w - 9 - PADDING_X, "you wrote");
+        mvwprintw(result_win, 7, PADDING_X, "%s", randstr.romanjistr);
+        mvwprintw(result_win, 7, w - 14 - PADDING_X, "correct answer");
       
         int len = strlen(in);
-        wmove(result_win, 6, 4 + len);
+        wmove(result_win, 6, PADDING_X + len);
     }
     wrefresh(result_win);
 
