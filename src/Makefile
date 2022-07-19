@@ -1,9 +1,28 @@
 CFLAGS = -lmenuw \
-		 -lformw \
-		 -lncursesw
+	-lformw \
+	-lncursesw
+OBJDIR = obj
+BIN = ckana
 
-ckana:
-	$(CC) main.c -o ckana $(CFLAGS)
+SRC := $(wildcard *.c **/*.c)
+OBJ := $(SRC:.c=.o)
+
+.PHONY: all install clean
+
+all: prebuild target
+
+prebuild:
+	mkdir -p $(OBJDIR)
+
+target: $(OBJ)
+	$(CC) -o $(BIN) $(CFLAGS) $(addprefix $(OBJDIR)/,$(notdir $(OBJ)))
+
+%.o: %.c
+	$(CC) -c -o $(OBJDIR)/$(notdir $@) $^
 
 install:
-	install -D -t $(PREFIX)/bin ckana
+	install -D -t $(PREFIX)/bin $(BIN)
+
+clean:
+	rm $(BIN)
+	rm -r $(OBJDIR)
