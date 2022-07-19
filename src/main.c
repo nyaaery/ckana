@@ -424,7 +424,7 @@ void hiragana_kana_problem(MaxCharLens* lens) {
     WINDOW* problem_win = new_win_center(h, w);
 
     mvwprintw(problem_win, 2, 4, "write in romanji");
-    mvwprintw(problem_win, 4, 4, randstr.kanastr);
+    mvwprintw(problem_win, 4, 4, "%s", randstr.kanastr);
     wmove(problem_win, 6, 4);
     wrefresh(problem_win);
 
@@ -507,18 +507,18 @@ void hiragana_kana_problem(MaxCharLens* lens) {
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
         mvwprintw(result_win, 2, 4, "CORRECT!");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, randstr.kanastr);
-        mvwprintw(result_win, 6, 4, in);
+        mvwprintw(result_win, 4, 4, "%s", randstr.kanastr);
+        mvwprintw(result_win, 6, 4, "%s", in);
     } else {
         init_pair(1, COLOR_RED, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
         mvwprintw(result_win, 2, 4, "incorrect");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, randstr.kanastr);
+        mvwprintw(result_win, 4, 4, "%s", randstr.kanastr);
       
-        mvwprintw(result_win, 6, 4, in);
+        mvwprintw(result_win, 6, 4, "%s", in);
         mvwprintw(result_win, 6, w - 9 - 4, "you wrote");
-        mvwprintw(result_win, 7, 4, randstr.romanjistr);
+        mvwprintw(result_win, 7, 4, "%s", randstr.romanjistr);
         mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
       
         int len = strlen(in);
@@ -545,7 +545,7 @@ void hiragana_romanji_problem() {
     WINDOW* problem_win = new_win_center(h, w);
 
     mvwprintw(problem_win, 2, 4, "select in hiragana");
-    mvwprintw(problem_win, 4, 4, problempair[1]);
+    mvwprintw(problem_win, 4, 4, "%s", problempair[1]);
     wrefresh(problem_win);
 
     int correct_i = rand() % option_count;
@@ -645,18 +645,18 @@ void hiragana_romanji_problem() {
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
         mvwprintw(result_win, 2, 4, "CORRECT!");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, problempair[1]);
-        mvwprintw(result_win, 6, 4, selected_pair[0]);
+        mvwprintw(result_win, 4, 4, "%s", problempair[1]);
+        mvwprintw(result_win, 6, 4, "%s", selected_pair[0]);
     } else {
         init_pair(1, COLOR_RED, COLOR_BLACK);
         wattron(result_win, COLOR_PAIR(1) | A_BOLD);
         mvwprintw(result_win, 2, 4, "incorrect");
         wstandend(result_win);
-        mvwprintw(result_win, 4, 4, problempair[1]);
+        mvwprintw(result_win, 4, 4, "%s", problempair[1]);
 
-        mvwprintw(result_win, 6, 4, selected_pair[0]);
+        mvwprintw(result_win, 6, 4, "%s", selected_pair[0]);
         mvwprintw(result_win, 6, w - 12 - 4, "you selected");
-        mvwprintw(result_win, 7, 4, problempair[0]);
+        mvwprintw(result_win, 7, 4, "%s", problempair[0]);
         mvwprintw(result_win, 7, w - 14 - 4, "correct answer");
 
         int len = strlen(selected_pair[0]);
